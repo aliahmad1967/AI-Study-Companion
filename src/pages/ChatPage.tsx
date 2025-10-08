@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from 'lucide-react';
+import { toast } from 'sonner'; // Import toast from sonner
 
 interface Message {
   id: number;
@@ -33,6 +34,7 @@ const ChatPage = () => {
       };
       setMessages((prev) => [...prev, aiResponse]);
       setLoading(false);
+      toast.info("ملاحظة: مساعد الدردشة بالذكاء الاصطناعي هنا محاكاة. تتطلب هذه الميزة إعداد خلفية (backend) وربطها بخدمات الذكاء الاصطناعي الخارجية.", { duration: 8000 });
     }, 1500);
   };
 
