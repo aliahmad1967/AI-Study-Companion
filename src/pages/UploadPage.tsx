@@ -63,8 +63,9 @@ const UploadPage = () => {
     toast.loading("جاري رفع وتحليل الملف...", { id: 'upload-progress' });
 
     try {
-      // Simulate file upload
+      // Simulate file upload and generate a placeholder URL
       await new Promise(resolve => setTimeout(resolve, 1000));
+      const fileUrl = `https://your-storage.com/uploads/${selectedFile.name.replace(/\s/g, '_')}-${Date.now()}`;
 
       // 1. Create a new page in Notion for the uploaded file (initial entry)
       const uploadPageResponse = await notion.pages.create({
@@ -96,7 +97,12 @@ const UploadPage = () => {
             ],
           },
           "File URL": {
-            url: "https://example.com/placeholder-file-url", // Placeholder URL
+            url: fileUrl, // Use the generated placeholder URL
+          },
+          "Created At": {
+            date: {
+              start: new Date().toISOString().split('T')[0],
+            },
           },
         },
       });
@@ -141,6 +147,11 @@ const UploadPage = () => {
             Question: { title: [{ text: { content: flashcard.question } }] },
             Answer: { rich_text: [{ text: { content: flashcard.answer } }] },
             Topic: { select: { name: flashcard.topic } },
+            "Created At": {
+              date: {
+                start: new Date().toISOString().split('T')[0],
+              },
+            },
           },
         });
       }
@@ -159,12 +170,18 @@ const UploadPage = () => {
             Title: { title: [{ text: { content: quiz.title } }] },
             Topic: { select: { name: quiz.topic } },
             "Number of Questions": { number: quiz.numberOfQuestions },
+            "Created At": {
+              date: {
+                start: new Date().toISOString().split('T')[0],
+              },
+            },
           },
         });
       }
       toast.success("تم إنشاء الاختبارات بنجاح!", { id: 'quiz-progress' });
 
       toast.success("اكتملت عملية الرفع والتحليل بنجاح!", { id: 'upload-progress' });
+      toast.info("ملاحظة: ميزات الذكاء الاصطناعي وتخزين الملفات هنا محاكاة. تتطلب هذه الميزات إعداد خلفية (backend) وربطها بخدمات الذكاء الاصطناعي الخارجية وتخزين الملفات الفعلي.", { duration: 8000 });
       setSelectedFile(null); // Clear selected file after successful upload
     } catch (error) {
       console.error("Failed to process upload:", error);
