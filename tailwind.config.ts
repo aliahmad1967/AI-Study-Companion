@@ -18,6 +18,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        cairo: ['Cairo', 'sans-serif'], // Add Cairo font
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
