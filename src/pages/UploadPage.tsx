@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +40,7 @@ const simulateAIGenerateQuizzes = (fileName: string): SimulatedQuiz[] => {
 const UploadPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Create a ref for the file input
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -47,6 +48,10 @@ const UploadPage = () => {
     } else {
       setSelectedFile(null);
     }
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click(); // Programmatically click the hidden file input
   };
 
   const handleUploadToNotion = async () => {
@@ -208,13 +213,14 @@ const UploadPage = () => {
             <Input
               id="file-upload"
               type="file"
-              className="hidden"
+              className="hidden" // Keep the input hidden
               onChange={handleFileChange}
               disabled={loading}
+              ref={fileInputRef} // Assign the ref to the input
             />
-            <label htmlFor="file-upload" className="cursor-pointer">
-              <Button variant="outline" disabled={loading}>تصفح الملفات</Button>
-            </label>
+            <Button variant="outline" onClick={handleBrowseClick} disabled={loading}>
+              تصفح الملفات
+            </Button>
             {selectedFile && (
               <p className="mt-2 text-sm text-muted-foreground">
                 الملف المحدد: {selectedFile.name}
