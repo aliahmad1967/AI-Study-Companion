@@ -5,8 +5,9 @@ import { notion, NOTION_DATABASE_ID_UPLOADS } from '@/lib/notion';
 import { NotionUploadPage } from '@/types/notion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download } from 'lucide-react';
+import { Download, Eye } from 'lucide-react'; // Added Eye icon
 import jsPDF from 'jspdf';
+import { ViewSummaryDialog } from '@/components/ViewSummaryDialog'; // Import the new dialog
 
 // Function to fetch uploaded summaries from Notion
 const fetchSummaries = async (): Promise<NotionUploadPage[]> => {
@@ -41,6 +42,9 @@ const fetchSummaries = async (): Promise<NotionUploadPage[]> => {
 };
 
 const SummariesPage = () => {
+  const [isViewDialogOpen, setIsViewDialogOpen] = React.useState(false);
+  const [selectedSummary, setSelectedSummary] = React.useState<{ title: string; content: string; createdAt: string } | null>(null);
+
   const { data: summaries, isLoading } = useQuery<NotionUploadPage[]>({
     queryKey: ['notionSummariesList'],
     queryFn: fetchSummaries,
@@ -78,6 +82,11 @@ const SummariesPage = () => {
     toast.success("تم تنزيل الملخص كملف PDF.");
   };
 
+  const handleViewSummary = (title: string, content: string, createdAt: string) => {
+    setSelectedSummary({ title, content, createdAt });
+    setIsViewDialogOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-4 text-center">
@@ -111,7 +120,15 @@ const SummariesPage = () => {
                     {content}
                   </p>
                 </CardContent>
-                <div className="p-4 border-t flex justify-end">
+                <div className="p-4 border-t flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewSummary(title, content, createdAt)}
+                  >
+                    <Eye className="h-4 w-4 ml-2" />
+                    عرض الملخص
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -128,6 +145,16 @@ const SummariesPage = () => {
           <p className="col-span-full text-muted-foreground">لا توجد ملخصات متاحة بعد. ارفع ملفًا لإنشاء واحد!</p>
         )}
       </div>
+
+      {selectedSummary && (
+        <ViewSummaryDialog
+          isOpen={isViewDialogOpen}
+          onClose={() => setIsViewDialogOpen(false)}
+          title={selectedSummary.title}
+          content={selectedSummary.content}
+          createdAt={selectedSummary.createdAt}
+        />
+      )}
     </div>
   );
 };
