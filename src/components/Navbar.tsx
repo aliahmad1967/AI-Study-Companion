@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Menu, MessageSquare } from "lucide-react"; // Removed LogIn, LogOut
+import { Menu, MessageSquare, FileText } from "lucide-react"; // Added FileText icon
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -10,17 +10,16 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
   { name: "الرئيسية", href: "/" },
-  { name: "لوحة التحكم", href: "/dashboard" }, // No authRequired anymore
-  { name: "رفع المحتوى", href: "/upload" }, // No authRequired anymore
-  { name: "الاختبارات", href: "/quizzes" }, // No authRequired anymore
-  { name: "البطاقات التعليمية", href: "/flashcards" }, // No authRequired anymore
+  { name: "لوحة التحكم", href: "/dashboard" },
+  { name: "رفع المحتوى", href: "/upload" },
+  { name: "الملخصات", href: "/summaries", icon: FileText }, // New link for Summaries
+  { name: "الاختبارات", href: "/quizzes" },
+  { name: "البطاقات التعليمية", href: "/flashcards" },
   { name: "مساعد الدردشة", href: "/chat", icon: MessageSquare },
   { name: "المساعدة", href: "/help" },
 ];
 
 export function Navbar() {
-  // Removed useAuth hook and handleSignOut function
-
   return (
     <nav className="bg-background border-b px-4 py-2 flex items-center justify-between shadow-sm">
       <div className="flex items-center gap-4">
@@ -39,7 +38,6 @@ export function Navbar() {
             </Link>
           </Button>
         ))}
-        {/* Removed Login/Logout buttons */}
         <ThemeToggle />
       </div>
 
@@ -66,7 +64,6 @@ export function Navbar() {
                   </Link>
                 </Button>
               ))}
-              {/* Removed Login/Logout buttons */}
             </nav>
           </SheetContent>
         </Sheet>
