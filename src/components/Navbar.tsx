@@ -2,35 +2,24 @@
 
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Menu, LogIn, LogOut, MessageSquare } from "lucide-react"; // Import MessageSquare icon
+import { Menu, MessageSquare } from "lucide-react"; // Removed LogIn, LogOut
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "./ThemeToggle";
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
 
 const navLinks = [
   { name: "الرئيسية", href: "/" },
-  { name: "لوحة التحكم", href: "/dashboard", authRequired: true },
-  { name: "رفع المحتوى", href: "/upload", authRequired: true },
-  { name: "الاختبارات", href: "/quizzes", authRequired: true },
-  { name: "البطاقات التعليمية", href: "/flashcards", authRequired: true },
-  { name: "مساعد الدردشة", href: "/chat", authRequired: true, icon: MessageSquare }, // Add chat link
+  { name: "لوحة التحكم", href: "/dashboard" }, // No authRequired anymore
+  { name: "رفع المحتوى", href: "/upload" }, // No authRequired anymore
+  { name: "الاختبارات", href: "/quizzes" }, // No authRequired anymore
+  { name: "البطاقات التعليمية", href: "/flashcards" }, // No authRequired anymore
+  { name: "مساعد الدردشة", href: "/chat", icon: MessageSquare },
   { name: "المساعدة", href: "/help" },
 ];
 
 export function Navbar() {
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error('فشل تسجيل الخروج: ' + error.message);
-    } else {
-      toast.success('تم تسجيل الخروج بنجاح!');
-    }
-  };
+  // Removed useAuth hook and handleSignOut function
 
   return (
     <nav className="bg-background border-b px-4 py-2 flex items-center justify-between shadow-sm">
@@ -43,28 +32,14 @@ export function Navbar() {
       {/* Desktop Navigation */}
       <div className="hidden md:flex items-center gap-4">
         {navLinks.map((link) => (
-          (!link.authRequired || user) && (
-            <Button key={link.name} variant="ghost" asChild>
-              <Link to={link.href}>
-                {link.icon && <link.icon className="h-4 w-4 ml-2" />}
-                {link.name}
-              </Link>
-            </Button>
-          )
-        ))}
-        {!user ? (
-          <Button variant="ghost" asChild>
-            <Link to="/auth">
-              <LogIn className="h-4 w-4 ml-2" />
-              تسجيل الدخول
+          <Button key={link.name} variant="ghost" asChild>
+            <Link to={link.href}>
+              {link.icon && <link.icon className="h-4 w-4 ml-2" />}
+              {link.name}
             </Link>
           </Button>
-        ) : (
-          <Button variant="ghost" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 ml-2" />
-            تسجيل الخروج
-          </Button>
-        )}
+        ))}
+        {/* Removed Login/Logout buttons */}
         <ThemeToggle />
       </div>
 
@@ -84,28 +59,14 @@ export function Navbar() {
             </Link>
             <nav className="flex flex-col gap-2">
               {navLinks.map((link) => (
-                (!link.authRequired || user) && (
-                  <Button key={link.name} variant="ghost" asChild className="justify-start">
-                    <Link to={link.href}>
-                      {link.icon && <link.icon className="h-4 w-4 ml-2" />}
-                      {link.name}
-                    </Link>
-                  </Button>
-                )
-              ))}
-              {!user ? (
-                <Button variant="ghost" asChild className="justify-start">
-                  <Link to="/auth">
-                    <LogIn className="h-4 w-4 ml-2" />
-                    تسجيل الدخول
+                <Button key={link.name} variant="ghost" asChild className="justify-start">
+                  <Link to={link.href}>
+                    {link.icon && <link.icon className="h-4 w-4 ml-2" />}
+                    {link.name}
                   </Link>
                 </Button>
-              ) : (
-                <Button variant="ghost" onClick={handleSignOut} className="justify-start">
-                  <LogOut className="h-4 w-4 ml-2" />
-                  تسجيل الخروج
-                </Button>
-              )}
+              ))}
+              {/* Removed Login/Logout buttons */}
             </nav>
           </SheetContent>
         </Sheet>
