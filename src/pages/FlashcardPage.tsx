@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react'; // Added CheckCircle icon
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { notion, NOTION_DATABASE_ID_FLASHCARDS } from '@/lib/notion';
 import { NotionFlashcardPage } from '@/types/notion';
-import { CreateFlashcardDialog } from '@/components/CreateFlashcardDialog'; // Import the new dialog
+import { CreateFlashcardDialog } from '@/components/CreateFlashcardDialog';
 
 // Function to fetch flashcards from Notion
 const fetchFlashcards = async (): Promise<NotionFlashcardPage[]> => {
@@ -37,7 +37,7 @@ const fetchFlashcards = async (): Promise<NotionFlashcardPage[]> => {
 const FlashcardPage = () => {
   const [isFlipped, setIsFlipped] = React.useState(false);
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false); // State for dialog
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
 
   const { data: flashcards, isLoading, refetch } = useQuery<NotionFlashcardPage[]>({
     queryKey: ['notionFlashcardsList'],
@@ -70,6 +70,33 @@ const FlashcardPage = () => {
     refetch(); // Refetch flashcards to include the new one
     setCurrentIndex(0); // Go to the first card (likely the new one if sorted by creation date)
     setIsFlipped(false);
+  };
+
+  const handleMarkAsReviewed = async () => {
+    if (!currentFlashcard) {
+      toast.error("لا توجد بطاقة تعليمية للمراجعة.");
+      return;
+    }
+
+    toast.loading("جاري تحديث البطاقة التعليمية...", { id: 'review-flashcard-progress' });
+
+    try {
+      await notion.pages.update({
+        page_id: currentFlashcard.id,
+        properties: {
+          "Last Reviewed": {
+            date: {
+              start: new Date().toISOString().split('T')[0], // Set current date as last reviewed
+            },
+          },
+        },
+      });
+      toast.success("تم وضع علامة 'تمت المراجعة' على البطاقة التعليمية بنجاح!", { id: 'review-flashcard-progress' });
+      refetch(); // Refetch to update the data, especially for dashboard stats
+    } catch (error) {
+      console.error("Failed to mark flashcard as reviewed:", error);
+      toast.error("فشل وضع علامة 'تمت المراجعة'. يرجى المحاولة مرة أخرى.", { id: 'review-flashcard-progress' });
+    }
   };
 
   if (isLoading) {
@@ -110,6 +137,10 @@ const FlashcardPage = () => {
             <Button variant="outline" onClick={handleNextFlashcard}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               البطاقة التالية
+            </Button>
+            <Button onClick={handleMarkAsReviewed} disabled={!currentFlashcard}>
+              <CheckCircle className="h-4 w-4 ml-2" />
+              تمت المراجعة
             </Button>
           </div>
         </>
