@@ -4,7 +4,38 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
-import { notion, NOTION_DATABASE_ID_UPLOADS } from '@/lib/notion';
+import { notion, NOTION_DATABASE_ID_UPLOADS, NOTION_DATABASE_ID_FLASHCARDS, NOTION_DATABASE_ID_QUIZZES } from '@/lib/notion';
+
+// --- AI Simulation Functions ---
+const simulateAISummary = (fileName: string): string => {
+  return `ملخص تم إنشاؤه بواسطة الذكاء الاصطناعي لـ "${fileName}": هذا الملف يتناول مواضيع متعددة مثل [الموضوع 1]، [الموضوع 2]، و[الموضوع 3]. النقاط الرئيسية تشمل [نقطة رئيسية 1] و [نقطة رئيسية 2].`;
+};
+
+interface SimulatedFlashcard {
+  question: string;
+  answer: string;
+  topic: string;
+}
+
+const simulateAIGenerateFlashcards = (fileName: string): SimulatedFlashcard[] => {
+  return [
+    { question: `ما هو الموضوع الرئيسي في ${fileName}؟`, answer: "الموضوع الرئيسي هو [الموضوع 1].", topic: "عام" },
+    { question: `اذكر نقطة رئيسية من ${fileName}.`, answer: "نقطة رئيسية هي [نقطة رئيسية 2].", topic: "عام" },
+  ];
+};
+
+interface SimulatedQuiz {
+  title: string;
+  topic: string;
+  numberOfQuestions: number;
+}
+
+const simulateAIGenerateQuizzes = (fileName: string): SimulatedQuiz[] => {
+  return [
+    { title: `اختبار قصير عن ${fileName}`, topic: "عام", numberOfQuestions: 5 },
+  ];
+};
+// --- End AI Simulation Functions ---
 
 const UploadPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -23,8 +54,8 @@ const UploadPage = () => {
       toast.error("الرجاء تحديد ملف للرفع.");
       return;
     }
-    if (!NOTION_DATABASE_ID_UPLOADS) {
-      toast.error("معرف قاعدة بيانات Notion للرفع غير موجود. يرجى التحقق من ملف .env.");
+    if (!NOTION_DATABASE_ID_UPLOADS || !NOTION_DATABASE_ID_FLASHCARDS || !NOTION_DATABASE_ID_QUIZZES) {
+      toast.error("معرفات قواعد بيانات Notion (للرفع، البطاقات، الاختبارات) غير موجودة. يرجى التحقق من ملف .env.");
       return;
     }
 
@@ -32,16 +63,15 @@ const UploadPage = () => {
     toast.loading("جاري رفع وتحليل الملف...", { id: 'upload-progress' });
 
     try {
-      // Simulate file upload and AI processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Simulate file upload
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Create a new page in Notion for the uploaded file
-      await notion.pages.create({
+      // 1. Create a new page in Notion for the uploaded file (initial entry)
+      const uploadPageResponse = await notion.pages.create({
         parent: {
           database_id: NOTION_DATABASE_ID_UPLOADS,
         },
         properties: {
-          // Ensure your Notion database has a 'Name' property of type 'title'
           Name: {
             title: [
               {
@@ -51,34 +81,94 @@ const UploadPage = () => {
               },
             ],
           },
-          // Ensure your Notion database has a 'Status' property of type 'select'
           Status: {
             select: {
-              name: "Uploaded", // You might change this to "Processing" or "Completed" later
+              name: "Uploaded",
             },
           },
-          // Ensure your Notion database has a 'Summary' property of type 'rich_text'
           Summary: {
             rich_text: [
               {
                 text: {
-                  content: "ملخص مبدئي: سيتم إنشاء الملخص بواسطة الذكاء الاصطناعي قريباً.",
+                  content: "جاري إنشاء الملخص بواسطة الذكاء الاصطناعي...",
                 },
               },
             ],
           },
-          // Ensure your Notion database has a 'File URL' property of type 'url'
           "File URL": {
             url: "https://example.com/placeholder-file-url", // Placeholder URL
           },
         },
       });
 
-      toast.success("تم رفع الملف بنجاح وإنشاء إدخال في Notion!", { id: 'upload-progress' });
+      const uploadedPageId = uploadPageResponse.id;
+      toast.loading("جاري تحليل المحتوى وإنشاء الملخص...", { id: 'upload-progress' });
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate AI processing time
+
+      // 2. Simulate AI summary generation and update the Notion page
+      const generatedSummary = simulateAISummary(selectedFile.name);
+      await notion.pages.update({
+        page_id: uploadedPageId,
+        properties: {
+          Status: {
+            select: {
+              name: "Summarized",
+            },
+          },
+          Summary: {
+            rich_text: [
+              {
+                text: {
+                  content: generatedSummary,
+                },
+              },
+            ],
+          },
+        },
+      });
+      toast.success("تم إنشاء الملخص بنجاح!", { id: 'upload-progress' });
+
+      // 3. Simulate AI flashcard generation and create Notion entries
+      toast.loading("جاري إنشاء البطاقات التعليمية...", { id: 'flashcard-progress' });
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate AI processing time
+      const generatedFlashcards = simulateAIGenerateFlashcards(selectedFile.name);
+      for (const flashcard of generatedFlashcards) {
+        await notion.pages.create({
+          parent: {
+            database_id: NOTION_DATABASE_ID_FLASHCARDS,
+          },
+          properties: {
+            Question: { title: [{ text: { content: flashcard.question } }] },
+            Answer: { rich_text: [{ text: { content: flashcard.answer } }] },
+            Topic: { select: { name: flashcard.topic } },
+          },
+        });
+      }
+      toast.success("تم إنشاء البطاقات التعليمية بنجاح!", { id: 'flashcard-progress' });
+
+      // 4. Simulate AI quiz generation and create Notion entries
+      toast.loading("جاري إنشاء الاختبارات...", { id: 'quiz-progress' });
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate AI processing time
+      const generatedQuizzes = simulateAIGenerateQuizzes(selectedFile.name);
+      for (const quiz of generatedQuizzes) {
+        await notion.pages.create({
+          parent: {
+            database_id: NOTION_DATABASE_ID_QUIZZES,
+          },
+          properties: {
+            Title: { title: [{ text: { content: quiz.title } }] },
+            Topic: { select: { name: quiz.topic } },
+            "Number of Questions": { number: quiz.numberOfQuestions },
+          },
+        });
+      }
+      toast.success("تم إنشاء الاختبارات بنجاح!", { id: 'quiz-progress' });
+
+      toast.success("اكتملت عملية الرفع والتحليل بنجاح!", { id: 'upload-progress' });
       setSelectedFile(null); // Clear selected file after successful upload
     } catch (error) {
-      console.error("Failed to upload to Notion:", error);
-      toast.error("فشل رفع الملف إلى Notion. يرجى المحاولة مرة أخرى.", { id: 'upload-progress' });
+      console.error("Failed to process upload:", error);
+      toast.error("فشل في معالجة الملف. يرجى المحاولة مرة أخرى.", { id: 'upload-progress' });
     } finally {
       setLoading(false);
     }
