@@ -5,9 +5,9 @@ import { notion, NOTION_DATABASE_ID_UPLOADS } from '@/lib/notion';
 import { NotionUploadPage } from '@/types/notion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Eye } from 'lucide-react'; // Added Eye icon
+import { Download, Eye, Share2 } from 'lucide-react'; // Added Share2 icon
 import jsPDF from 'jspdf';
-import { ViewSummaryDialog } from '@/components/ViewSummaryDialog'; // Import the new dialog
+import { ViewSummaryDialog } from '@/components/ViewSummaryDialog';
 
 // Function to fetch uploaded summaries from Notion
 const fetchSummaries = async (): Promise<NotionUploadPage[]> => {
@@ -87,6 +87,24 @@ const SummariesPage = () => {
     setIsViewDialogOpen(true);
   };
 
+  const handleShareSummary = async (title: string, content: string) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `ملخص: ${title}`,
+          text: content,
+        });
+        toast.success("تمت مشاركة الملخص بنجاح!");
+      } else {
+        await navigator.clipboard.writeText(content);
+        toast.success("تم نسخ الملخص إلى الحافظة!");
+      }
+    } catch (error) {
+      console.error("Failed to share or copy summary:", error);
+      toast.error("فشل في مشاركة أو نسخ الملخص.");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-4 text-center">
@@ -128,6 +146,14 @@ const SummariesPage = () => {
                   >
                     <Eye className="h-4 w-4 ml-2" />
                     عرض الملخص
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShareSummary(title, content)}
+                  >
+                    <Share2 className="h-4 w-4 ml-2" />
+                    مشاركة
                   </Button>
                   <Button
                     variant="outline"
