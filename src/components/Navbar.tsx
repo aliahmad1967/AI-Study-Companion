@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Menu, MessageSquare, FileText, BookOpen } from "lucide-react"; // Added BookOpen icon for flashcards
+import { Menu, MessageSquare, FileText } from "lucide-react"; // Added FileText icon
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -12,9 +12,9 @@ const navLinks = [
   { name: "الرئيسية", href: "/" },
   { name: "لوحة التحكم", href: "/dashboard" },
   { name: "رفع المحتوى", href: "/upload" },
-  { name: "الملخصات", href: "/summaries", icon: FileText },
+  { name: "الملخصات", href: "/summaries", icon: FileText }, // New link for Summaries
   { name: "الاختبارات", href: "/quizzes" },
-  { name: "البطاقات التعليمية", href: "/flashcards", icon: BookOpen }, // Added icon here
+  { name: "البطاقات التعليمية", href: "/flashcards" },
   { name: "مساعد الدردشة", href: "/chat", icon: MessageSquare },
   { name: "المساعدة", href: "/help" },
 ];
