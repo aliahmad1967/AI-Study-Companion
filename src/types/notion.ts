@@ -59,6 +59,7 @@ export interface NotionFlashcardPage {
     Answer: NotionRichTextProperty;
     Topic: NotionSelectProperty;
     "Last Reviewed": NotionDateProperty;
+    "Created At": NotionDateProperty; // Added 'Created At' property
   };
 }
 
