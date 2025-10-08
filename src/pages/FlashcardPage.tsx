@@ -7,41 +7,30 @@ import { toast } from 'sonner';
 import { notion, NOTION_DATABASE_ID_FLASHCARDS } from '@/lib/notion';
 import { NotionFlashcardPage } from '@/types/notion';
 
-// Mock data fetching function for Flashcards
+// Function to fetch flashcards from Notion
 const fetchFlashcards = async (): Promise<NotionFlashcardPage[]> => {
-  // Simulate API call to Notion
-  await new Promise(resolve => setTimeout(resolve, 700));
-  // In a real scenario, you would query NOTION_DATABASE_ID_FLASHCARDS
-  // For now, return mock data
-  return [
-    {
-      id: '1',
-      properties: {
-        Question: { title: [{ text: { content: "ما هي عاصمة مصر؟" } }] },
-        Answer: { rich_text: [{ text: { content: "القاهرة" } }] },
-        Topic: { select: { id: '1', name: 'جغرافيا', color: 'blue' } },
-        "Last Reviewed": { date: null },
-      },
-    },
-    {
-      id: '2',
-      properties: {
-        Question: { title: [{ text: { content: "من هو مؤلف رواية 'الحرب والسلام'؟" } }] },
-        Answer: { rich_text: [{ text: { content: "ليو تولستوي" } }] },
-        Topic: { select: { id: '2', name: 'أدب', color: 'green' } },
-        "Last Reviewed": { date: null },
-      },
-    },
-    {
-      id: '3',
-      properties: {
-        Question: { title: [{ text: { content: "ما هو العنصر الكيميائي الذي رمزه O؟" } }] },
-        Answer: { rich_text: [{ text: { content: "الأكسجين" } }] },
-        Topic: { select: { id: '3', name: 'علوم', color: 'red' } },
-        "Last Reviewed": { date: null },
-      },
-    },
-  ];
+  if (!NOTION_DATABASE_ID_FLASHCARDS) {
+    toast.error("معرف قاعدة بيانات Notion للبطاقات التعليمية غير موجود. يرجى التحقق من ملف .env.");
+    return [];
+  }
+
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_DATABASE_ID_FLASHCARDS,
+      sorts: [
+        {
+          property: "Created At", // Assuming a 'Created At' property for sorting
+          direction: "descending",
+        },
+      ],
+    });
+
+    return response.results as NotionFlashcardPage[];
+  } catch (error) {
+    console.error("Failed to fetch flashcards from Notion:", error);
+    toast.error("فشل تحميل البطاقات التعليمية من Notion.");
+    return [];
+  }
 };
 
 const FlashcardPage = () => {
@@ -116,6 +105,12 @@ const FlashcardPage = () => {
           Topic: {
             select: {
               name: "عام", // Default topic, user can change in Notion
+            },
+          },
+          // Assuming a 'Created At' property of type 'date'
+          "Created At": {
+            date: {
+              start: new Date().toISOString().split('T')[0], // Current date
             },
           },
         },
