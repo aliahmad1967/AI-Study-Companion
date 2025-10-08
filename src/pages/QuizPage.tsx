@@ -6,41 +6,30 @@ import { toast } from 'sonner';
 import { notion, NOTION_DATABASE_ID_QUIZZES } from '@/lib/notion';
 import { NotionQuizPage } from '@/types/notion';
 
-// Mock data fetching function for Quizzes
+// Function to fetch quizzes from Notion
 const fetchQuizzes = async (): Promise<NotionQuizPage[]> => {
-  // Simulate API call to Notion
-  await new Promise(resolve => setTimeout(resolve, 600));
-  // In a real scenario, you would query NOTION_DATABASE_ID_QUIZZES
-  // For now, return mock data
-  return [
-    {
-      id: 'q1',
-      properties: {
-        Title: { title: [{ text: { content: "اختبار تاريخ الأندلس" } }] },
-        Topic: { select: { id: 't1', name: 'تاريخ', color: 'red' } },
-        "Number of Questions": { number: 10 },
-        "Created At": { date: null },
-      },
-    },
-    {
-      id: 'q2',
-      properties: {
-        Title: { title: [{ text: { content: "اختبار أساسيات البرمجة" } }] },
-        Topic: { select: { id: 't2', name: 'برمجة', color: 'blue' } },
-        "Number of Questions": { number: 15 },
-        "Created At": { date: null },
-      },
-    },
-    {
-      id: 'q3',
-      properties: {
-        Title: { title: [{ text: { content: "اختبار علوم الفضاء" } }] },
-        Topic: { select: { id: 't3', name: 'علوم', color: 'green' } },
-        "Number of Questions": { number: 8 },
-        "Created At": { date: null },
-      },
-    },
-  ];
+  if (!NOTION_DATABASE_ID_QUIZZES) {
+    toast.error("معرف قاعدة بيانات Notion للاختبارات غير موجود. يرجى التحقق من ملف .env.");
+    return [];
+  }
+
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_DATABASE_ID_QUIZZES,
+      sorts: [
+        {
+          property: "Created At", // Assuming a 'Created At' property for sorting
+          direction: "descending",
+        },
+      ],
+    });
+
+    return response.results as NotionQuizPage[];
+  } catch (error) {
+    console.error("Failed to fetch quizzes from Notion:", error);
+    toast.error("فشل تحميل الاختبارات من Notion.");
+    return [];
+  }
 };
 
 const QuizPage = () => {
@@ -85,6 +74,12 @@ const QuizPage = () => {
           // Ensure your Notion database has a 'Number of Questions' property of type 'number'
           "Number of Questions": {
             number: 10, // Default number of questions
+          },
+          // Assuming a 'Created At' property of type 'date'
+          "Created At": {
+            date: {
+              start: new Date().toISOString().split('T')[0], // Current date
+            },
           },
         },
       });
