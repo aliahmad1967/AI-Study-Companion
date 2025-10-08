@@ -17,19 +17,48 @@ const ChatPage = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const getSimulatedAIResponse = (userInput: string): string => {
+    const lowerInput = userInput.toLowerCase();
+
+    if (lowerInput.includes("مرحبا") || lowerInput.includes("أهلاً")) {
+      return "أهلاً بك! كيف يمكنني مساعدتك اليوم؟";
+    }
+    if (lowerInput.includes("ملخص") || lowerInput.includes("تلخيص")) {
+      return "يمكنني مساعدتك في تلخيص المستندات. يرجى الانتقال إلى صفحة 'رفع المحتوى' لرفع ملفاتك.";
+    }
+    if (lowerInput.includes("اختبار") || lowerInput.includes("اختبارات")) {
+      return "يمكنك إنشاء اختبارات جديدة أو مراجعة الاختبارات الموجودة في صفحة 'الاختبارات'.";
+    }
+    if (lowerInput.includes("بطاقات") || lowerInput.includes("بطاقة تعليمية")) {
+      return "تفضل بزيارة صفحة 'البطاقات التعليمية' لإنشاء بطاقات جديدة أو مراجعة البطاقات الموجودة.";
+    }
+    if (lowerInput.includes("شكرا") || lowerInput.includes("شكرًا")) {
+      return "على الرحب والسعة! يسعدني مساعدتك.";
+    }
+    if (lowerInput.includes("كيف حالك")) {
+      return "أنا ذكاء اصطناعي، ليس لدي مشاعر، لكنني جاهز للمساعدة!";
+    }
+    if (lowerInput.includes("من أنت")) {
+      return "أنا رفيق الدراسة بالذكاء الاصطناعي، هنا لمساعدتك في دراستك.";
+    }
+    return `لقد تلقيت رسالتك: "${userInput}". أنا مساعد دراسي بالذكاء الاصطناعي، ويمكنني مساعدتك في الملخصات والاختبارات والبطاقات التعليمية.`;
+  };
+
   const handleSendMessage = async () => {
     if (input.trim() === '') return;
 
     const newUserMessage: Message = { id: messages.length + 1, text: input, sender: 'user' };
     setMessages((prev) => [...prev, newUserMessage]);
+    const userMessageText = input; // Store input before clearing
     setInput('');
     setLoading(true);
 
     // Simulate AI response
     setTimeout(() => {
+      const aiResponseText = getSimulatedAIResponse(userMessageText);
       const aiResponse: Message = {
         id: messages.length + 2,
-        text: `أهلاً بك! لقد تلقيت رسالتك: "${input}". كيف يمكنني مساعدتك اليوم؟ (هذه رسالة تجريبية من الذكاء الاصطناعي)`,
+        text: aiResponseText,
         sender: 'ai',
       };
       setMessages((prev) => [...prev, aiResponse]);
