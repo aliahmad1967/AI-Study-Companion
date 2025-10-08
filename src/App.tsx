@@ -14,7 +14,8 @@ import QuizPage from "./pages/QuizPage";
 import FlashcardPage from "./pages/FlashcardPage";
 import HelpPage from "./pages/HelpPage";
 import ChatPage from "./pages/ChatPage";
-import SummariesPage from "./pages/SummariesPage"; // Import the new page
+import SummariesPage from "./pages/SummariesPage";
+import QuizDetailPage from "./pages/QuizDetailPage"; // Import the new page
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,9 +34,10 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/upload" element={<UploadPage />} />
                 <Route path="/quizzes" element={<QuizPage />} />
+                <Route path="/quizzes/:quizId" element={<QuizDetailPage />} /> {/* New route */}
                 <Route path="/flashcards" element={<FlashcardPage />} />
                 <Route path="/chat" element={<ChatPage />} />
-                <Route path="/summaries" element={<SummariesPage />} /> {/* New route */}
+                <Route path="/summaries" element={<SummariesPage />} />
                 <Route path="/help" element={<HelpPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

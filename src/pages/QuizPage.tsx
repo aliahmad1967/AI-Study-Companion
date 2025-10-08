@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { notion, NOTION_DATABASE_ID_QUIZZES } from '@/lib/notion';
 import { NotionQuizPage } from '@/types/notion';
-import { CreateQuizDialog } from '@/components/CreateQuizDialog'; // Import the new dialog
+import { CreateQuizDialog } from '@/components/CreateQuizDialog';
+import { Link } from 'react-router-dom'; // Import Link
 
 // Function to fetch quizzes from Notion
 const fetchQuizzes = async (): Promise<NotionQuizPage[]> => {
@@ -34,7 +35,7 @@ const fetchQuizzes = async (): Promise<NotionQuizPage[]> => {
 };
 
 const QuizPage = () => {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false); // State for dialog
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
 
   const { data: quizzes, isLoading, refetch } = useQuery<NotionQuizPage[]>({
     queryKey: ['notionQuizzesList'],
@@ -68,8 +69,10 @@ const QuizPage = () => {
           <div className="space-y-4">
             {quizzes && quizzes.length > 0 ? (
               quizzes.map((quiz) => (
-                <Button key={quiz.id} className="w-full">
-                  اختبار عن: {quiz.properties.Title.title[0]?.text.content} ({quiz.properties["Number of Questions"]?.number || 0} أسئلة)
+                <Button key={quiz.id} className="w-full" asChild>
+                  <Link to={`/quizzes/${quiz.id}`}>
+                    اختبار عن: {quiz.properties.Title.title[0]?.text.content} ({quiz.properties["Number of Questions"]?.number || 0} أسئلة)
+                  </Link>
                 </Button>
               ))
             ) : (

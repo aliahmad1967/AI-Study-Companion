@@ -66,6 +66,15 @@ export function CreateQuizDialog({
 
     toast.loading("جاري إنشاء اختبار جديد في Notion...", { id: 'create-quiz-progress' });
 
+    // Simulate AI generating questions
+    const simulatedQuestions = Array.from({ length: values.numberOfQuestions }, (_, i) => ({
+      question: `السؤال ${i + 1}: ما هو [مفهوم] متعلق بـ ${values.title}؟`,
+      options: ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
+      correctAnswer: "الخيار أ",
+    }));
+    const questionsContent = JSON.stringify(simulatedQuestions, null, 2);
+
+
     try {
       await notion.pages.create({
         parent: {
@@ -93,6 +102,15 @@ export function CreateQuizDialog({
             date: {
               start: new Date().toISOString().split('T')[0],
             },
+          },
+          QuestionsContent: { // Add simulated questions content
+            rich_text: [
+              {
+                text: {
+                  content: questionsContent,
+                },
+              },
+            ],
           },
         },
       });

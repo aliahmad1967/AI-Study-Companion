@@ -70,5 +70,6 @@ export interface NotionQuizPage {
     Topic: NotionSelectProperty;
     "Number of Questions": NotionNumberProperty;
     "Created At": NotionDateProperty;
+    QuestionsContent: NotionRichTextProperty; // Added for quiz questions
   };
 }
